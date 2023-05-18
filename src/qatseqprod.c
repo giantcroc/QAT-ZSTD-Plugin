@@ -60,15 +60,15 @@
 #include <string.h> /* memset */
 #include <stdarg.h>
 
-#include "cpa.h"
-#include "cpa_dc.h"
-#include "icp_sal_poll.h"
-#include "icp_sal_user.h"
+#include "qat/cpa.h"
+#include "qat/cpa_dc.h"
+#include "qat/icp_sal_poll.h"
+#include "qat/icp_sal_user.h"
 
 #include "qatseqprod.h"
 
 #ifdef ENABLE_USDM_DRV
-#include "qae_mem.h"
+#include "qat/qae_mem.h"
 #endif
 
 #define KB                             (1024)
@@ -500,6 +500,7 @@ const char *getSectionName(void)
 
 static int QZSTD_salUserStart(void)
 {
+#ifndef INTREE
     Cpa32U pcieCount;
 
     if (CPA_STATUS_SUCCESS != icp_adf_get_numDevices(&pcieCount)) {
@@ -512,6 +513,13 @@ static int QZSTD_salUserStart(void)
                   "There is no QAT device available, please check QAT device status\n");
         return QZSTD_FAIL;
     }
+#else
+    if (CPA_TRUE != icp_sal_userIsQatAvailable()) {
+        QZSTD_LOG(1,
+                  "There is no QAT device available, please check QAT device status\n");
+        return QZSTD_FAIL;
+    }
+#endif
 
     if (CPA_STATUS_SUCCESS != icp_sal_userStart(getSectionName())) {
         QZSTD_LOG(1, "icp_sal_userStart failed\n");
@@ -1005,6 +1013,8 @@ static size_t QZSTD_decLz4s(ZSTD_Sequence *outSeqs, size_t outSeqsCapacity,
     unsigned int histLiteralLen = 0;
 
     size_t seqsIdx = 0;
+
+    QZSTD_LOG(3, "outSeqsCapacity %lu\n", outSeqsCapacity);
 
     while (ip < endip && lz4sBufSize > 0) {
         size_t length = 0;

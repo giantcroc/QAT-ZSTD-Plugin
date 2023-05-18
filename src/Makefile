@@ -41,29 +41,16 @@ LIBDIR     ?= $(INSTALLDIR)/lib
 INCLUDEDIR ?= $(INSTALLDIR)/include
 
 CP ?= cp
+MKDIR ?= mkdir
 
-QATFLAGS = -I$(ICP_ROOT)/quickassist/include	\
-		   -I$(ICP_ROOT)/quickassist/include/dc	\
-		   -I$(ICP_ROOT)/quickassist/lookaside/access_layer/include
-
-ifdef ZSTDLIB
-CFLAGS   += -I$(ZSTDLIB)
-endif
-
-LDFLAGS  = -L$(ICP_ROOT)/build -lqat_s
-
-ENABLE_USDM_DRV ?= 0
-ifneq ($(ENABLE_USDM_DRV), 0)
-  	QATFLAGS += -I$(ICP_ROOT)/quickassist/utilities/libusdm_drv -DENABLE_USDM_DRV
-  	LDFLAGS  += -lusdm_drv_s
-endif
+QATFLAGS = -DINTREE -DENABLE_USDM_DRV
 
 CFLAGS += -Wall -Werror -Wextra -Wcast-align -Wshadow -Wstrict-aliasing=1 \
 		  -Wswitch-enum -Wdeclaration-after-statement -Wstrict-prototypes \
 		  -Wundef -Wpointer-arith -Wvla -Wformat=2 -Winit-self \
 		  -Wfloat-equal -Wwrite-strings -Wredundant-decls -Wc++-compat \
-		  -pedantic -fstack-protector-strong -fPIE -fPIC \
-		  -fno-delete-null-pointer-checks -fwrapv -fno-strict-overflow
+		  -pedantic -fstack-protector-strong \
+		  -fno-delete-null-pointer-checks -fwrapv
 
 DEBUGLEVEL ?=0
 
@@ -74,27 +61,30 @@ else
 	QATFLAGS += -O3
 endif
 
+$(info INSTALLDIR="$(INSTALLDIR)")
+$(info CPPFLAGS="$(CPPFLAGS)")
+
 qatseqprod.o: qatseqprod.c
-	$(CC) -c $(CFLAGS) $(QATFLAGS) $(DEBUGFLAGS) $^ -o $@
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(QATFLAGS) $(DEBUGFLAGS) $^ -o $@
 
 lib: qatseqprod.o
 	$(AR) rc libqatseqprod.a $^
-	$(CC) -shared $^ $(LDFLAGS) -o libqatseqprod.so
+	@echo qatseqprod library successfully build
 
 .PHONY: install
 install: lib
+	$(MKDIR) -p $(LIBDIR)
+	$(MKDIR) -p $(INCLUDEDIR)
 	$(CP) libqatseqprod.a $(LIBDIR)
-	$(CP) libqatseqprod.so $(LIBDIR)
 	$(CP) qatseqprod.h $(INCLUDEDIR)
 	@echo qatseqprod library successfully installed
 
 .PHONY: uninstall
 uninstall:
 	$(RM) $(LIBDIR)/libqatseqprod.a
-	$(RM) $(LIBDIR)/libqatseqprod.so
 	$(RM) $(INCLUDEDIR)/qatseqprod.h
 	@echo qatseqprod library successfully uninstalled
 
 clean:
 	$(RM) *.o
-	$(RM) libqatseqprod.a libqatseqprod.so
+	$(RM) libqatseqprod.a

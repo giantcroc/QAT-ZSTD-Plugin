@@ -34,13 +34,7 @@
 # #######################################################################
 LIB     = ../src
 
-LDFLAGS += -lqat_s -lusdm_drv_s $(LIB)/libqatseqprod.a -I$(LIB)
-
-ifdef ZSTDLIB
-LDFLAGS += $(ZSTDLIB)/libzstd.a -I$(ZSTDLIB)
-else
-LDFLAGS += /usr/local/lib/libzstd.a
-endif
+LDFLAGS +=  -L$(LIB) -I$(LIB) -l:libqatseqprod.a -l:libqat.a -l:libusdm.a -l:libzstd.a -lpthread -lcrypto
 
 default: test benchmark
 
@@ -51,7 +45,7 @@ test: test.c
 	$(CC) $^ $(LDFLAGS) -o $@
 
 benchmark: benchmark.c
-	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@ -lpthread
+	$(CC) $^ $(LDFLAGS) -o $@
 
 clean:
 	$(Q)$(MAKE) -C $(LIB) $@
