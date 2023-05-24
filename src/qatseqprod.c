@@ -956,6 +956,7 @@ int QZSTD_startQatDevice(void)
                                    QZSTD_OK : QZSTD_STARTED;
     }
     QZSTD_LOG(2, "InitStatus: %d\n", gProcess.qzstdInitStatus);
+    QZSTD_LOG(0,"Instances :%d\n",gProcess.numInstances);
     pthread_mutex_unlock(&gProcess.mutex);
     return gProcess.qzstdInitStatus;
 }
