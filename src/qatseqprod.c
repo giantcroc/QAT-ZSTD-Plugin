@@ -956,7 +956,7 @@ int QZSTD_startQatDevice(void)
                                    QZSTD_OK : QZSTD_STARTED;
     }
     QZSTD_LOG(2, "InitStatus: %d\n", gProcess.qzstdInitStatus);
-    QZSTD_LOG(0,"Instances :%d\n",gProcess.numInstances);
+    QZSTD_LOG(0,"Instances num:%d\n",gProcess.numInstances);
     pthread_mutex_unlock(&gProcess.mutex);
     return gProcess.qzstdInitStatus;
 }
@@ -1148,6 +1148,8 @@ size_t qatSequenceProducer(
     if (-1 == i) {
         QZSTD_LOG(1, "Failed to grab instance\n");
         return ZSTD_SEQUENCE_PRODUCER_ERROR;
+    }else{
+        QZSTD_LOG(0,"grab instance id:%d\n",i);
     }
 
     zstdSess->instHint = i;
